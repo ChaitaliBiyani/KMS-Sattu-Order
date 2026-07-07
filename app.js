@@ -91,7 +91,7 @@ let activeOrderId = "";
 let isAdminLoggedIn = false;
 
 // Google Apps Script Web App URL for sending email receipts & saving to Google Sheet
-const googleScriptURL = "https://script.google.com/macros/s/AKfycbOjuY9qSEuqJ4GS1PbVOokbktsnavTRU3F8TfwrdIL-ue53z8pEWB0ClNySZhJXawq/exec";
+const googleScriptURL = "https://script.google.com/macros/s/AKfycbxOjuY9qSEuqJ4GS1PbVOokbktsnavTRU3F8TfwrdIL-ue53z8pEWB0ClNySZhJXawq/exec";
 
 
 
