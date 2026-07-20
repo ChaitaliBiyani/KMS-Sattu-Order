@@ -377,19 +377,7 @@ function calculateTotals() {
   document.getElementById("total-qty").innerText = totalQty;
   document.getElementById("grand-total").innerText = `₹${grandTotal.toFixed(2)}`;
 
-  // Update UPI Payment Deep Link for Mobile
-  const upiLink = document.getElementById("upi-mobile-link");
-  if (upiLink) {
-    if (grandTotal > 0) {
-      const upiIdStr = "swatibipinkabra@okicici"; // Global UPI ID
-      const upiUrl = `upi://pay?pa=${upiIdStr}&pn=Swati%20Kabra&am=${grandTotal.toFixed(2)}&cu=INR`;
-      upiLink.href = upiUrl;
-      upiLink.style.display = "inline-flex";
-    } else {
-      upiLink.href = "#";
-      upiLink.style.display = "none";
-    }
-  }
+  // Completed totals calculation
 }
 
 // Submit the Order (replaces generateBill)
