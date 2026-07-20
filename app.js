@@ -533,16 +533,11 @@ function processSubmitOrder(orderId, kshetra, custName, custMobile, paymentMetho
     </div>
   `;
 
-  // Trigger Google Apps Script to save to spreadsheet (email sent to dummy/empty)
-  const submitBtn = document.querySelector(".summary-sidebar button[onclick='submitOrder()']");
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.innerText = "Submitting Order...";
-  }
-
+  // Trigger Google Apps Script to save to spreadsheet in the background (non-blocking)
   if (googleScriptURL) {
     fetch(googleScriptURL, {
       method: "POST",
+      mode: "no-cors", // Omit CORS checks so browser fires-and-forgets instantly
       body: JSON.stringify({
         id: orderId,
         kshetra: kshetra,
@@ -556,33 +551,11 @@ function processSubmitOrder(orderId, kshetra, custName, custMobile, paymentMetho
         items: activeItems,
         timestamp: new Date().toLocaleString()
       })
-    })
-    .then(res => res.json())
-    .then(resData => {
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerText = "Submit Order";
-      }
-      
-      if (resData && resData.status === "error") {
-        alert(resData.message);
-        return;
-      }
-      
-      completeOrderSubmission(orderId, kshetra, custName, custMobile, paymentMethod, upiId, activeItems, totalQty, grandTotal, billHTML);
-    })
-    .catch(err => {
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerText = "Submit Order";
-      }
-      console.warn("Failed to read JSON response (Apps Script CORS fallback):", err);
-      // Fallback: Proceed for backward compatibility if fetch completes but doesn't return JSON
-      completeOrderSubmission(orderId, kshetra, custName, custMobile, paymentMethod, upiId, activeItems, totalQty, grandTotal, billHTML);
-    });
-  } else {
-    completeOrderSubmission(orderId, kshetra, custName, custMobile, paymentMethod, upiId, activeItems, totalQty, grandTotal, billHTML);
+    }).catch(err => console.error("Background save failed:", err));
   }
+
+  // Instantly complete order submission (modal, WhatsApp redirect) without waiting for API response
+  completeOrderSubmission(orderId, kshetra, custName, custMobile, paymentMethod, upiId, activeItems, totalQty, grandTotal, billHTML);
 }
 
 // Complete submission and render billing modal
