@@ -540,13 +540,15 @@ function processSubmitOrder(orderId, kshetra, custName, custMobile, paymentMetho
   `;
 
   // Trigger Google Apps Script to save to spreadsheet (email sent to dummy/empty)
+  const submitBtn = document.querySelector(".summary-sidebar button[onclick='submitOrder()']");
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Submitting Order...";
+  }
+
   if (googleScriptURL) {
     fetch(googleScriptURL, {
       method: "POST",
-      mode: "no-cors",
-      headers: {
-        "Content-Type": "application/json"
-      },
       body: JSON.stringify({
         id: orderId,
         kshetra: kshetra,
@@ -563,14 +565,36 @@ function processSubmitOrder(orderId, kshetra, custName, custMobile, paymentMetho
         screenshotName: screenshotName
       })
     })
-    .then(() => {
-      console.log("Order pushed to Google Sheets successfully!");
+    .then(res => res.json())
+    .then(resData => {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Submit Order";
+      }
+      
+      if (resData && resData.status === "error") {
+        alert(resData.message);
+        return;
+      }
+      
+      completeOrderSubmission(orderId, kshetra, custName, custMobile, paymentMethod, upiId, activeItems, totalQty, grandTotal, billHTML);
     })
     .catch(err => {
-      console.error("Failed to connect to Google Apps Script Web App:", err);
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Submit Order";
+      }
+      console.warn("Failed to read JSON response (Apps Script CORS fallback):", err);
+      // Fallback: Proceed for backward compatibility if fetch completes but doesn't return JSON
+      completeOrderSubmission(orderId, kshetra, custName, custMobile, paymentMethod, upiId, activeItems, totalQty, grandTotal, billHTML);
     });
+  } else {
+    completeOrderSubmission(orderId, kshetra, custName, custMobile, paymentMethod, upiId, activeItems, totalQty, grandTotal, billHTML);
   }
+}
 
+// Complete submission and render billing modal
+function completeOrderSubmission(orderId, kshetra, custName, custMobile, paymentMethod, upiId, activeItems, totalQty, grandTotal, billHTML) {
   // Populate global state for WhatsApp sharing
   currentOrderDetailsForWA = {
     orderId: orderId,
