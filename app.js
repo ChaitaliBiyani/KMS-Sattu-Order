@@ -481,11 +481,24 @@ function submitOrder() {
   }
 
   const orderId = "ORD-" + Math.floor(100000 + Math.random() * 900000);
-  processSubmitOrder(orderId, kshetra, custName, custMobile, paymentMethod, upiId, activeItems, totalQty, grandTotal);
+  
+  const fileInput = document.getElementById("payment-screenshot");
+  if (paymentMethod === "UPI" && fileInput && fileInput.files && fileInput.files[0]) {
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const fileData = e.target.result.split(',')[1];
+      const fileName = file.name;
+      processSubmitOrder(orderId, kshetra, custName, custMobile, paymentMethod, upiId, activeItems, totalQty, grandTotal, fileData, fileName);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    processSubmitOrder(orderId, kshetra, custName, custMobile, paymentMethod, upiId, activeItems, totalQty, grandTotal, "", "");
+  }
 }
 
 // Process the order saving
-function processSubmitOrder(orderId, kshetra, custName, custMobile, paymentMethod, upiId, activeItems, totalQty, grandTotal) {
+function processSubmitOrder(orderId, kshetra, custName, custMobile, paymentMethod, upiId, activeItems, totalQty, grandTotal, screenshotData = "", screenshotName = "") {
   let tbodyHTML = "";
   activeItems.forEach(item => {
     let displayName = `${item.productName} (${item.category})`;
@@ -552,7 +565,9 @@ function processSubmitOrder(orderId, kshetra, custName, custMobile, paymentMetho
         qty: totalQty,
         total: grandTotal,
         items: activeItems,
-        timestamp: new Date().toLocaleString()
+        timestamp: new Date().toLocaleString(),
+        screenshotData: screenshotData,
+        screenshotName: screenshotName
       })
     })
     .then(() => {
@@ -597,6 +612,8 @@ function processSubmitOrder(orderId, kshetra, custName, custMobile, paymentMetho
   document.getElementById("customer-mobile").value = "";
   const upiInput = document.getElementById("payment-upi-id");
   if (upiInput) upiInput.value = "";
+  const fileInputEl = document.getElementById("payment-screenshot");
+  if (fileInputEl) fileInputEl.value = "";
   
   // Reset payment method selection to UPI
   const upiRadio = document.querySelector('input[name="payment-method"][value="UPI"]');

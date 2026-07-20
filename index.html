@@ -117,6 +117,15 @@
             <label for="payment-upi-id">UPI Transaction ID (UTR / Reference No.) <span style="color: #ef4444;">*</span></label>
             <input type="text" id="payment-upi-id" placeholder="Enter 12-digit numerical UTR number" style="border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; font-family: 'Outfit', sans-serif; background: white; width: 100%; box-sizing: border-box; font-size: 1rem;">
           </div>
+          
+          <!-- Screenshot Upload -->
+          <div class="input-group" style="margin-top: 15px;">
+            <label for="payment-screenshot" style="font-weight: 600;">Upload Payment Screenshot / Receipt (Optional)</label>
+            <div style="font-size: 0.82rem; color: #4b5563; line-height: 1.45; margin-bottom: 8px;">
+              <em>💡 Note: GPay may block screenshots on some phones. You can share/download the receipt from your GPay transaction history and upload that photo here!</em>
+            </div>
+            <input type="file" id="payment-screenshot" accept="image/*" style="border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; font-family: 'Outfit', sans-serif; background: white; width: 100%; box-sizing: border-box; font-size: 0.95rem;">
+          </div>
         </div>
 
         <!-- Cash Payment details card (Hidden by default) -->
