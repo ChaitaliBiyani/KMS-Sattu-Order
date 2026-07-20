@@ -466,34 +466,27 @@ function submitOrder() {
   const paymentMethodInput = document.querySelector('input[name="payment-method"]:checked');
   const paymentMethod = paymentMethodInput ? paymentMethodInput.value : "UPI";
   
-  let upiId = "-";
+  const fileInput = document.getElementById("payment-screenshot");
   if (paymentMethod === "UPI") {
-    const upiInput = document.getElementById("payment-upi-id");
-    upiId = upiInput ? upiInput.value.trim() : "";
-    if (!upiId) {
-      alert("Please enter the UPI Transaction ID (UTR).");
-      return;
-    }
-    if (!/^\d{12}$/.test(upiId)) {
-      alert("UPI Transaction ID must be exactly a 12-digit number.");
+    if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+      alert("Please upload your payment screenshot/receipt to submit the order.");
       return;
     }
   }
 
   const orderId = "ORD-" + Math.floor(100000 + Math.random() * 900000);
   
-  const fileInput = document.getElementById("payment-screenshot");
   if (paymentMethod === "UPI" && fileInput && fileInput.files && fileInput.files[0]) {
     const file = fileInput.files[0];
     const reader = new FileReader();
     reader.onload = function(e) {
       const fileData = e.target.result.split(',')[1];
       const fileName = file.name;
-      processSubmitOrder(orderId, kshetra, custName, custMobile, paymentMethod, upiId, activeItems, totalQty, grandTotal, fileData, fileName);
+      processSubmitOrder(orderId, kshetra, custName, custMobile, paymentMethod, "-", activeItems, totalQty, grandTotal, fileData, fileName);
     };
     reader.readAsDataURL(file);
   } else {
-    processSubmitOrder(orderId, kshetra, custName, custMobile, paymentMethod, upiId, activeItems, totalQty, grandTotal, "", "");
+    processSubmitOrder(orderId, kshetra, custName, custMobile, paymentMethod, "-", activeItems, totalQty, grandTotal, "", "");
   }
 }
 
@@ -521,7 +514,7 @@ function processSubmitOrder(orderId, kshetra, custName, custMobile, paymentMetho
         <strong>WhatsApp Number:</strong> ${custMobile}<br>
         <strong>Kshetra:</strong> ${kshetra}<br>
         <strong>Payment Method:</strong> ${paymentMethod}<br>
-        ${paymentMethod === "UPI" ? `<strong>UPI Transaction ID (UTR):</strong> ${upiId}` : ''}
+        ${paymentMethod === "UPI" ? `<strong>Payment Screenshot:</strong> Uploaded` : ''}
       </p>
       <table class="bill-table" border="1" cellpadding="6" cellspacing="0" style="width:100%; border-collapse: collapse;">
         <thead style="background-color: #f2f2f2;">
@@ -610,8 +603,6 @@ function processSubmitOrder(orderId, kshetra, custName, custMobile, paymentMetho
   document.querySelectorAll(".qty-warning").forEach(warning => warning.style.display = "none");
   document.getElementById("customer-name").value = "";
   document.getElementById("customer-mobile").value = "";
-  const upiInput = document.getElementById("payment-upi-id");
-  if (upiInput) upiInput.value = "";
   const fileInputEl = document.getElementById("payment-screenshot");
   if (fileInputEl) fileInputEl.value = "";
   
@@ -676,7 +667,7 @@ function generateWhatsAppText(d) {
   text += `*Kshetra:* ${d.kshetra}\n`;
   text += `*Payment Method:* ${d.paymentMethod}\n`;
   if (d.paymentMethod === "UPI") {
-    text += `*UPI Transaction ID (UTR):* ${d.upiId}\n\n`;
+    text += `*Payment Proof:* Screenshot Uploaded\n\n`;
   } else {
     text += `\n`;
   }
@@ -690,7 +681,7 @@ function generateWhatsAppText(d) {
   text += `*Grand Total:* ₹${d.grandTotal.toFixed(2)}\n\n`;
   
   if (d.paymentMethod === "UPI") {
-    text += `_Order placed using UPI. UTR ID: ${d.upiId}. Please verify and confirm order._`;
+    text += `_Order will be confirmed on your WhatsApp after checking your payment._`;
   } else {
     text += `_Please make cash payment to your respective Kshetra member. Once received, order will be confirmed._`;
   }
